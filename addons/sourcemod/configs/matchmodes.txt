@@ -1,0 +1,115 @@
+"MatchModes"
+{
+	"ZoneMod Configs"
+	{
+		"zonemod"
+		{
+			"name" "ZoneMod 2.5"
+		}
+		"zonemodold"
+		{
+			"name" "ZoneMod 1.9.16"
+		}
+		"zm3v3"
+		{
+			"name" "3v3 ZoneMod"
+		}
+		"zm2v2"
+		{
+			"name" "2v2 ZoneMod"
+		}
+		"zm1v1"
+		{
+			"name" "1v1 ZoneMod"
+		}
+	}
+	"NextMod Configs"
+	{
+		"nextmod"
+		{
+			"name" "NextMod 1.0.5"
+		}
+		"nextmod3v3"
+		{
+			"name" "3v3 NextMod"
+		}
+		"nextmod2v2"
+		{
+			"name" "2v2 NextMod"
+		}
+		"nextmod1v1"
+		{
+			"name" "1v1 NextMod"
+		}
+	}
+	"Hunters Configs"
+	{
+		"zonehunters"
+		{
+			"name" "ZoneHunters 2.5"
+		}
+		"zh3v3"
+		{
+			"name" "3v3 ZoneHunters"
+		}
+		"zh2v2"
+		{
+			"name" "2v2 ZoneHunters"
+		}
+		"zh1v1"
+		{
+			"name" "1v1 ZoneHunters"
+		}
+	}
+	"Confogl Configs"
+	{
+		"confogl"
+		{
+			"name" "Confogl"
+		}
+		"confo3v3"
+		{
+			"name" "3v3 Confogl"
+		}
+		"confo2v2"
+		{
+			"name" "2v2 Confogl"
+		}
+		"confo1v1"
+		{
+			"name" "1v1 Confogl"
+		}
+	}
+	"Scavogl Configs"
+	{
+		"scavogl"
+		{
+			"name" "Scavogl 2.1"
+		}
+		"scav3v3"
+		{
+			"name" "3v3 Scavogl"
+		}
+		"scav2v2"
+		{
+			"name" "2v2 Scavogl"
+		}
+		"scav1v1"
+		{
+			"name" "1v1 Scavogl"
+		}
+	}
+	"Others Configs"
+	{
+		"vssurvival"
+		{
+			"name" "Versus Survival"
+		}
+		"coop"
+		{
+			"name" "Coop Improved IA"
+		}
+	}
+}
+
+	
