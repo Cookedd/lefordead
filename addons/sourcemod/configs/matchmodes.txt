@@ -101,10 +101,6 @@
 	}
 	"Others Configs"
 	{
-		"vssurvival"
-		{
-			"name" "Versus Survival"
-		}
 		"coop"
 		{
 			"name" "Coop Improved IA"
