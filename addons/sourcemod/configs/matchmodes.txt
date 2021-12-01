@@ -6,10 +6,6 @@
 		{
 			"name" "ZoneMod 2.5.2"
 		}
-		"zonemodold"
-		{
-			"name" "ZoneMod 1.9.16"
-		}
 		"zm3v3"
 		{
 			"name" "3v3 ZoneMod"
@@ -101,9 +97,9 @@
 	}
 	"Others Configs"
 	{
-		"coop"
+		"practiceogl"
 		{
-			"name" "Coop Improved IA"
+			"name" "Improved Gauntlet"
 		}
 	}
 }
