@@ -4,7 +4,7 @@
 	{
 		"zonemod"
 		{
-			"name" "ZoneMod 2.5.3"
+			"name" "ZoneMod 2.5.4"
 		}
 		"zm3v3"
 		{
@@ -42,7 +42,7 @@
 	{
 		"zonehunters"
 		{
-			"name" "ZoneHunters 2.5.3"
+			"name" "ZoneHunters 2.5.4"
 		}
 		"zh3v3"
 		{
@@ -57,23 +57,23 @@
 			"name" "1v1 ZoneHunters"
 		}
 	}
-	"Confogl Configs"
+	"Medkits Configs"
 	{
-		"confogl"
+		"medkits"
 		{
-			"name" "Confogl"
+			"name" "Medkits"
 		}
-		"confo3v3"
+		"med3v3"
 		{
-			"name" "3v3 Confogl"
+			"name" "3v3 Medkits"
 		}
-		"confo2v2"
+		"med2v2"
 		{
-			"name" "2v2 Confogl"
+			"name" "2v2 Medkits"
 		}
-		"confo1v1"
+		"med1v1"
 		{
-			"name" "1v1 Confogl"
+			"name" "1v1 Medkits"
 		}
 	}
 	"Scavogl Configs"
