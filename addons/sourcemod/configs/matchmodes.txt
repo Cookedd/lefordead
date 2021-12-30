@@ -76,6 +76,25 @@
 			"name" "1v1 Medkits"
 		}
 	}
+	"Acemod Revamped Configs"
+	{
+		"acemodrv"
+		{
+			"name" "Acemod RV 1"
+		}
+		"amrv3v3"
+		{
+			"name" "3v3 Acemod RV"
+		}
+		"amrv2v2"
+		{
+			"name" "2v2 Acemod RV"
+		}
+		"amrv1v1"
+		{
+			"name" "1v1 Acemod RV"
+		}
+	}
 	"Scavogl Configs"
 	{
 		"scavogl"
