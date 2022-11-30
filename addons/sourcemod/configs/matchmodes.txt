@@ -4,7 +4,11 @@
 	{
 		"zonemod"
 		{
-			"name" "ZoneMod 2.5.4"
+			"name" "ZoneMod 2.8"
+		}
+		"zoneretro"
+		{
+			"name" "ZoneMod Retro 2.8"
 		}
 		"zm3v3"
 		{
@@ -17,6 +21,13 @@
 		"zm1v1"
 		{
 			"name" "1v1 ZoneMod"
+		}
+	}
+	"NeoMod Configs"
+	{
+		"neomod"
+		{
+			"name" "NeoMod Tourney 0.4a"
 		}
 	}
 	"NextMod Configs"
@@ -38,49 +49,18 @@
 			"name" "1v1 NextMod"
 		}
 	}
-	"Hunters Configs"
+	"Promod Configs"
 	{
-		"zonehunters"
+		"pmelite"
 		{
-			"name" "ZoneHunters 2.5.4"
-		}
-		"zh3v3"
-		{
-			"name" "3v3 ZoneHunters"
-		}
-		"zh2v2"
-		{
-			"name" "2v2 ZoneHunters"
-		}
-		"zh1v1"
-		{
-			"name" "1v1 ZoneHunters"
-		}
-	}
-	"Medkits Configs"
-	{
-		"medkits"
-		{
-			"name" "Medkits"
-		}
-		"med3v3"
-		{
-			"name" "3v3 Medkits"
-		}
-		"med2v2"
-		{
-			"name" "2v2 Medkits"
-		}
-		"med1v1"
-		{
-			"name" "1v1 Medkits"
+			"name" "Promod Elite 1.1"
 		}
 	}
 	"Acemod Revamped Configs"
 	{
 		"acemodrv"
 		{
-			"name" "Acemod RV 1"
+			"name" "Acemod RV 1.3"
 		}
 		"amrv3v3"
 		{
@@ -95,32 +75,49 @@
 			"name" "1v1 Acemod RV"
 		}
 	}
-	"Scavogl Configs"
+	"EQ Configs"
 	{
-		"scavogl"
+		"eq"
 		{
-			"name" "Scavogl 2.1"
+			"name" "Equilibrium 3.0c"
 		}
-		"scav3v3"
+		"eq3v3"
 		{
-			"name" "3v3 Scavogl"
+			"name" "3v3 EQ"
 		}
-		"scav2v2"
+		"eq2v2"
 		{
-			"name" "2v2 Scavogl"
+			"name" "2v2 EQ"
 		}
-		"scav1v1"
+		"eq1v1"
 		{
-			"name" "1v1 Scavogl"
+			"name" "1v1 EQ"
 		}
 	}
-	"Others Configs"
+	"Apex Configs"
 	{
-		"practiceogl"
+		"apex"
 		{
-			"name" "Improved Gauntlet"
+			"name" "Apex 1.1.2"
+		}
+	}
+	"Hunters Configs"
+	{
+		"zonehunters"
+		{
+			"name" "ZoneHunters 2.8"
+		}
+		"zh3v3"
+		{
+			"name" "3v3 ZoneHunters"
+		}
+		"zh2v2"
+		{
+			"name" "2v2 ZoneHunters"
+		}
+		"zh1v1"
+		{
+			"name" "1v1 ZoneHunters"
 		}
 	}
 }
-
-	

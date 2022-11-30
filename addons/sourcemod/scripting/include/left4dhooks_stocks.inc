@@ -1,29 +1,29 @@
 /**
  * =============================================================================
  * Left 4 Dead Stocks Library (C)2011-2012 Buster "Mr. Zero" Nielsen
- * Syntax Update and merge into "Left 4 DHooks Direct" (C) 2021 "SilverShot"
+ * Syntax Update and merge into "Left 4 DHooks Direct" (C) 2022 "SilverShot"
  * =============================================================================
  *
- * This program is free software; you can redistribute it and/or modify it 
- * under the terms of the GNU General Public License, version 3.0, as 
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License, version 3.0, as
  * published by the Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
  * more details.
  *
- * You should have received a copy of the GNU General Public License along 
+ * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * As a special exception, AlliedModders LLC gives you permission to link the
  * code of this program (as well as its derivative works) to "Half-Life 2,"
- * the "Source Engine," the "SourcePawn JIT," and any Game MODs that run on 
+ * the "Source Engine," the "SourcePawn JIT," and any Game MODs that run on
  * software by the Valve Corporation.  You must obey the GNU General Public
- * License in all respects for all other code used.  Additionally, 
- * AlliedModders LLC grants this exception to all derivative works.  
- * AlliedModders LLC defines further exceptions, found in LICENSE.txt 
- * (as of this writing, version JULY-31-2007), or 
+ * License in all respects for all other code used.  Additionally,
+ * AlliedModders LLC grants this exception to all derivative works.
+ * AlliedModders LLC defines further exceptions, found in LICENSE.txt
+ * (as of this writing, version JULY-31-2007), or
  * <http://www.sourcemod.net/license.php>.
  */
 
@@ -155,6 +155,29 @@ enum L4DResourceType
 	L4DResource_TankTickets2
 }
 
+stock const char L4D1ZombieClassname[6][] =
+{
+	"smoker",
+	"boomer",
+	"hunter",
+	"witch",
+	"tank",
+	"error_bad_L4D1ZombieClassType"
+};
+
+stock const char L4D2ZombieClassname[9][] =
+{
+	"smoker",
+	"boomer",
+	"hunter",
+	"spitter",
+	"jockey",
+	"charger",
+	"witch",
+	"tank",
+	"error_bad_L4D2ZombieClassType"
+};
+
 static const char L4DResourceName[L4DResourceType][] =
 {
 	"m_iPing",
@@ -165,6 +188,19 @@ static const char L4DResourceName[L4DResourceType][] =
 	"m_wantsToPlay",
 	"m_tankTickets"
 };
+
+/**
+ * Returns the clients team using L4DTeam.
+ *
+ * @param client		Player's index.
+ * @return				Current L4DTeam of player.
+ * @error				Invalid client index.
+ */
+stock L4DTeam L4D_GetClientTeam(int client)
+{
+	int team = GetClientTeam(client);
+	return view_as<L4DTeam>(team);
+}
 
 /**
  * Returns zombie player L4D1 zombie class.
@@ -201,7 +237,7 @@ stock void L4D1_SetPlayerZombieClass(int client, L4D1ZombieClassType class)
  * @error				Invalid client index.
  */
 // L4D2 only.
-stock L4D2ZombieClassType L4D2_GetPlayerZombieClass(int client)
+stock any L4D2_GetPlayerZombieClass(int client)
 {
 	return view_as<L4D2ZombieClassType>(GetEntProp(client, Prop_Send, "m_zombieClass"));
 }
