@@ -18,8 +18,8 @@
 
 
 
-#define PLUGIN_VERSION		"1.122"
-#define PLUGIN_VERLONG		1122
+#define PLUGIN_VERSION		"1.126"
+#define PLUGIN_VERLONG		1126
 
 #define DEBUG				0
 // #define DEBUG			1	// Prints addresses + detour info (only use for debugging, slows server down)
@@ -271,8 +271,8 @@ int g_iOff_InvulnerabilityTimer;
 int g_iOff_m_iTankTickets;
 int g_iOff_m_iSurvivorHealthBonus;
 int g_iOff_m_bFirstSurvivorLeftStartArea;
-int g_iOff_m_iShovePenalty;
-int g_iOff_m_fNextShoveTime;
+// int g_iOff_m_iShovePenalty;
+// int g_iOff_m_fNextShoveTime;
 int g_iOff_m_preIncapacitatedHealth;
 int g_iOff_m_preIncapacitatedHealthBuffer;
 int g_iOff_m_maxFlames;
@@ -292,7 +292,7 @@ int L4D2CountdownTimer_Offsets[9];
 int L4D2IntervalTimer_Offsets[6];
 
 // l4d2weapons.inc
-int L4D2IntWeapon_Offsets[5];
+int L4D2IntWeapon_Offsets[6];
 int L4D2FloatWeapon_Offsets[21];
 int L4D2BoolMeleeWeapon_Offsets[1];
 int L4D2IntMeleeWeapon_Offsets[2];
@@ -312,6 +312,13 @@ Address g_pZombieManager;
 Address g_pMeleeWeaponInfoStore;
 Address g_pWeaponInfoDatabase;
 Address g_pScriptVM;
+Address g_pCTerrorPlayer_CanBecomeGhost;
+
+
+
+// CanBecomeGhost patch
+ArrayList g_hCanBecomeGhost;
+int g_iCanBecomeGhostOffset;
 
 
 
@@ -328,7 +335,8 @@ bool g_bLinuxOS;
 bool g_bLeft4Dead2;
 bool g_bMapStarted;
 bool g_bRoundEnded;
-bool g_bCheckpoint[MAXPLAYERS+1];
+bool g_bCheckpointFirst[MAXPLAYERS+1];
+bool g_bCheckpointLast[MAXPLAYERS+1];
 ConVar g_hCvar_VScriptBuffer;
 ConVar g_hCvar_AddonsEclipse;
 ConVar g_hCvar_RescueDeadTime;
@@ -337,6 +345,7 @@ ConVar g_hCvar_Adrenaline;
 ConVar g_hCvar_Revives;
 ConVar g_hCvar_MPGameMode;
 DynamicHook g_hScriptHook;
+
 
 
 // Spitter acid projectile damage
@@ -435,7 +444,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	// ====================================================================================================
 	//									DUPLICATE PLUGIN RUNNING
 	// ====================================================================================================
-	if( GetFeatureStatus(FeatureType_Native, "L4D_BecomeGhost") != FeatureStatus_Unknown )
+	if( GetFeatureStatus(FeatureType_Native, "L4D_BecomeGhost") == FeatureStatus_Available )
 	{
 		strcopy(error, err_max, "\n====================\nPlugin \"Left 4 DHooks\" is already running. Please remove the duplicate plugin.\n====================");
 		return APLRes_SilentFailure;
@@ -505,6 +514,8 @@ public void OnPluginStart()
 	g_fLoadTime = GetEngineTime();
 
 	g_iClassTank = g_bLeft4Dead2 ? 8 : 5;
+
+	g_hCanBecomeGhost = new ArrayList();
 
 	if( g_bLeft4Dead2 )
 		g_iAttackTimer = FindSendPropInfo("CTerrorWeapon", "m_attackTimer");
@@ -691,32 +702,80 @@ public void OnPluginStart()
 	//									EVENTS
 	// ====================================================================================================
 	HookEvent("round_start",					Event_RoundStart);
-	HookEvent("player_left_checkpoint",			Event_LeftCheckpoint);
-	HookEvent("player_entered_checkpoint",		Event_EnteredCheckpoint);
+
 	if( !g_bLeft4Dead2 )
-		HookEvent("player_entered_start_area",	Event_EnteredCheckpoint);
-}
-
-void Event_EnteredCheckpoint(Event event, const char[] name, bool dontBroadcast)
-{
-	g_bCheckpoint[GetClientOfUserId(event.GetInt("userid"))] = true;
-}
-
-void Event_LeftCheckpoint(Event event, const char[] name, bool dontBroadcast)
-{
-	g_bCheckpoint[GetClientOfUserId(event.GetInt("userid"))] = false;
+	{
+		HookEvent("round_end",						Event_RoundEnd);
+		HookEvent("player_entered_start_area",		Event_EnteredStartArea);
+		HookEvent("player_left_start_area",			Event_LeftStartArea);
+		HookEvent("player_left_checkpoint",			Event_LeftCheckpoint);
+		HookEvent("player_entered_checkpoint",		Event_EnteredCheckpoint);
+	}
 }
 
 void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	g_bRoundEnded = false;
+}
 
-	for( int i = 1; i <= MaxClients; i++ )
+void Event_RoundEnd(Event event, const char[] name, bool dontBroadcast)
+{
+	// Reset checkpoints
+	if( !g_bLeft4Dead2 )
 	{
-		if( IsClientInGame(i) && GetClientTeam(i) == 2 )
-			g_bCheckpoint[i] = true;
-		else
-			g_bCheckpoint[i] = false;
+		for( int i = 1; i <= MaxClients; i++ )
+		{
+			g_bCheckpointFirst[i] = false;
+			g_bCheckpointLast[i] = false;
+		}
+	}
+}
+
+void Event_EnteredStartArea(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	g_bCheckpointFirst[client] = true;
+}
+
+void Event_LeftStartArea(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	g_bCheckpointFirst[client] = false;
+}
+
+void Event_EnteredCheckpoint(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = event.GetInt("userid");
+	if( client )
+	{
+		client = GetClientOfUserId(client);
+		if( client )
+		{
+			int door = event.GetInt("door");
+
+			if( door == GetCheckpointFirst() )
+			{
+				g_bCheckpointFirst[client] = true;
+			}
+			else if( door == GetCheckpointLast() )
+			{
+				g_bCheckpointLast[client] = true;
+			}
+		}
+	}
+}
+
+void Event_LeftCheckpoint(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = event.GetInt("userid");
+	if( client )
+	{
+		client = GetClientOfUserId(client);
+		if( client )
+		{
+			g_bCheckpointFirst[client] = false;
+			g_bCheckpointLast[client] = false;
+		}
 	}
 }
 
@@ -727,8 +786,16 @@ void Event_RoundStart(Event event, const char[] name, bool dontBroadcast)
 // ====================================================================================================
 public void OnPluginEnd()
 {
+	// Unpatch AddonsDisabler
 	if( g_bLeft4Dead2 )
 		AddonsDisabler_Unpatch();
+
+	// Unpatch CanBecomeGhost
+	int count = g_hCanBecomeGhost.Length;
+	for( int i = 0; i < count; i++ )
+	{
+		StoreToAddress(g_pCTerrorPlayer_CanBecomeGhost + view_as<Address>(g_iCanBecomeGhostOffset + i), g_hCanBecomeGhost.Get(i), NumberType_Int8, true);
+	}
 
 	// Target Filters
 	UnloadTargetFilters();
@@ -841,6 +908,16 @@ public void OnMapEnd()
 	g_bMapStarted = false;
 	g_iMaxChapters = 0;
 
+	// Reset checkpoints
+	if( !g_bLeft4Dead2 )
+	{
+		for( int i = 1; i <= MaxClients; i++ )
+		{
+			g_bCheckpointFirst[i] = false;
+			g_bCheckpointLast[i] = false;
+		}
+	}
+
 	// Reset hooks
 	g_iAnimationHookedClients.Clear();
 	g_iAnimationHookedPlugins.Clear();
@@ -866,6 +943,9 @@ public void OnMapEnd()
 
 public void OnClientDisconnect(int client)
 {
+	g_bCheckpointFirst[client] = false;
+	g_bCheckpointLast[client] = false;
+
 	// Remove client from hooked list
 	int index = g_iAnimationHookedClients.FindValue(client);
 	if( index != -1 )
