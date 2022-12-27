@@ -120,4 +120,11 @@
 			"name" "1v1 ZoneHunters"
 		}
 	}
+	"Gauntlet Configs"
+	{
+		"gauntlet"
+		{
+			"name" "Gauntlet(!limit)"
+		}
+	}
 }
