@@ -1,1 +1,1 @@
-configs/sn_main_name.txt
+ configs/sn_main_name.txt

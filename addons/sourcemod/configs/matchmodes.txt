@@ -124,7 +124,7 @@
 	{
 		"gauntlet"
 		{
-			"name" "Gauntlet(!limit)"
+			"name" "Gauntlet (!limit)"
 		}
 	}
 }
