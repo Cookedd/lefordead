@@ -1,0 +1,37 @@
+"Games"
+{
+	"#default"
+	{
+		"Signatures"
+		{
+			/* @Crasher_3637 Thanks!
+			 * How to find on windows:
+			 * https://forums.alliedmods.net/showpost.php?p=2737146&postcount=119
+			*/
+			"PassServerEntityFilter"
+			{
+				"library"	"server"
+
+				"windows"	"\x55\x8b\xec\x57\x8b\x7d\x0c\x85\xff\x75\x2a\xb0\x01\x5f\x5d\xc3\x56\x8b\x75"
+				"linux"		"@_Z22PassServerEntityFilterPK13IHandleEntityS1_"
+			}
+		}
+	}
+
+	"left4dead2"
+	{
+		"Signatures"
+		{
+			/*
+			 * Only for Windows, because sourcehook is not thread safe (the windows server crashes).
+			*/
+			"CCollisionEvent::ShouldCollide"
+			{
+				"library"	"server"
+
+				"windows"	"\x55\x8B\xEC\x83\xEC\x1C\x53\x8B\xD9\xFF\x83\x58\x01\x00\x00"
+							/* 55 8B EC 83 EC 44 53 57 8B F9 FF 87 5C 01 00 00 */
+			}
+		}
+	}
+}
