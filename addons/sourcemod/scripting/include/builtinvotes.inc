@@ -42,6 +42,8 @@
 #define BUILTINVOTES_ALL_TEAMS			-1 // Defined by TF2, may be the same in L4D/L4D2
 #define BUILTINVOTES_SERVER_INDEX 		99 // Defined by TF2, may be the same in L4D/L4D2
 
+#define BV_DATA_HNDL_CLOSE				(1 << 0)
+
 /**
  * Reasons a vote can end.
  */
@@ -72,7 +74,6 @@ enum BuiltinVoteType
 	BuiltinVoteType_ScrambleEnd = 13,	/**< TF2: Yes/No, argument ignored */
 	BuiltinVoteType_Custom_Mult = 14,	/**< TF2: Multiple-choice, argument is vote text. */
 	BuiltinVoteType_Alltalk = 15,		/**< L4D2: Yes/No, argument ignored (handled internally by extension) */
-
 }
 
 /**
@@ -171,7 +172,7 @@ enum BuiltinVoteFailReason
 {
 	BuiltinVoteFail_Generic = 0,		/**< Vote was generically cancelled. */
 	BuiltinVoteFail_Loses = 3,			/**< No votes outnumbered Yes votes */
-	BuiltinVoteFail_NotEnoughVotes = 4,	/**< Vote did not receive enough votes. */
+	BuiltinVoteFail_NotEnoughVotes = 4,	/**< Vote did not receive enough votes. */	
 }
 
 enum eVoteType
@@ -180,6 +181,35 @@ enum eVoteType
 	eBuiltinVote = 0,
 	eGameVote = 1
 };
+
+enum eBuiltinVoteCreateError
+{
+	eBuiltinVoteErrorNone = 0, // Vote was created
+	eBlockedWithForward, // Vote blocked with forward 'OnBuiltinVoteCreated'
+	eInvalidParamBuiltinVoteType // Invalid parameter 'BuiltinVoteType' passed to native 'CreateBuiltinVote' or not available in this game
+};
+
+/**
+ * Called at the start of creating a vote, at this moment information such as argument, initiator, etc. is not available.
+ * NOTE: When using this forward, you need to add a check to the plugin for the vote handle, 
+ * otherwise there will be errors in the logs of the sourcemod, because the vote handle will not be set after blocking the forward.
+ *
+ * @param hPlugin			Handle to the plugin from which the vote was created.
+ * @param sPluginName		The name of the plugin from which the vote was created.
+ * @return					'Plugin_Continue' to allow voting, otherwise voting will be blocked.
+ */
+forward Action OnBuiltinVoteCreate(Handle hPlugin, const char[] sPluginName);
+
+/**
+ * Called when a vote is created and the vote panel has not yet been sent to the players,
+ * at this moment information such as argument, initiator, etc. is available.
+ *
+ * @param hVote				Vote Handle.
+ * @param hPlugin			Handle to the plugin from which the vote was created.
+ * @param sPluginName		The saved name of the plugin from which the vote was created.
+ * @return					'Plugin_Continue' to allow voting, otherwise voting will be blocked.
+ */
+forward Action OnBuiltinVoteStart(Handle hVote, Handle hPlugin, const char[] sPluginName);
 
 /**
  * Called when a vote action is completed.
@@ -202,9 +232,11 @@ typedef BuiltinVoteActionHandler = function void(Handle vote, BuiltinVoteAction 
  *							Cancel, and End will always be received regardless
  *							of whether they are set or not.  They are also
  *							the only default actions.
- * @return					A new vote Handle.
+ * @param error				The reason why the vote was not created.
+ *
+ * @return					A new vote Handle or null if vote was not created.
  */
-native Handle CreateBuiltinVote(BuiltinVoteActionHandler handler, BuiltinVoteType voteType, BuiltinVoteAction actions=BUILTINVOTE_ACTIONS_DEFAULT);
+native Handle CreateBuiltinVote(BuiltinVoteActionHandler handler, BuiltinVoteType voteType, BuiltinVoteAction actions = BUILTINVOTE_ACTIONS_DEFAULT, eBuiltinVoteCreateError &error);
 
 /**
  * Broadcasts a vote to a list of clients.  The most selected item will be
@@ -392,8 +424,12 @@ native void CancelBuiltinVote();
  *							defines.
  * @noreturn
  */
-typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info);
-//typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_clients, const int[][2] client_info, int num_items, const int[][2] item_info);
+//typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info);
+typeset BuiltinVoteHandler
+{
+	function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info);
+	function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info, any data);
+};
 
 /**
  * Sets an advanced vote handling callback.  If this callback is set,
@@ -401,10 +437,16 @@ typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_c
  *
  * @param vote				BuiltinVote Handle.
  * @param callback			Callback function.
+ * @param data				Handle or value to pass through to the BuiltinVoteHandler callback function.
+ * @param dataFlags			'BV_DATA_HNDL_CLOSE' for the data handle to be destroyed after the vote or 0.
+ *							If you are passing in parameter 'data' a handle (for example - DataPack) here that was supposed to be closed,
+ *							you must pass the constant 'BV_DATA_HNDL_CLOSE' to parameter 'dataFlags'.
+ *							If you pass a constant 'BV_DATA_HNDL_CLOSE' to parameter 'dataFlags',
+ *							then extension will destroy it or you have to close it yourself to avoid getting a memory leak.
  * @noreturn
  * @error					Invalid Handle or callback.
  */
-native void SetBuiltinVoteResultCallback(Handle vote, BuiltinVoteHandler callback);
+native void SetBuiltinVoteResultCallback(Handle vote, BuiltinVoteHandler callback, any data = 0, int dataFlags = 0);
 
 /**
  * Returns the number of seconds you should "wait" before displaying
