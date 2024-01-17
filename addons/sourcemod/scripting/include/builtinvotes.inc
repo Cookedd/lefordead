@@ -35,14 +35,10 @@
 #endif
 #define _builtinvotes_included
 
-/* Version from here - https://github.com/A1mDev/builtinvotes/blob/master/sourcemod/scripting/include/builtinvotes.inc */
-
 #define BUILTINVOTES_EXTEND 			"Extend current Map" /** Defined in TF2, but doesn't appear to be localized */
 
 #define BUILTINVOTES_ALL_TEAMS			-1 // Defined by TF2, may be the same in L4D/L4D2
 #define BUILTINVOTES_SERVER_INDEX 		99 // Defined by TF2, may be the same in L4D/L4D2
-
-#define BV_DATA_HNDL_CLOSE				(1 << 0)
 
 /**
  * Reasons a vote can end.
@@ -74,6 +70,7 @@ enum BuiltinVoteType
 	BuiltinVoteType_ScrambleEnd = 13,	/**< TF2: Yes/No, argument ignored */
 	BuiltinVoteType_Custom_Mult = 14,	/**< TF2: Multiple-choice, argument is vote text. */
 	BuiltinVoteType_Alltalk = 15,		/**< L4D2: Yes/No, argument ignored (handled internally by extension) */
+
 }
 
 /**
@@ -172,44 +169,8 @@ enum BuiltinVoteFailReason
 {
 	BuiltinVoteFail_Generic = 0,		/**< Vote was generically cancelled. */
 	BuiltinVoteFail_Loses = 3,			/**< No votes outnumbered Yes votes */
-	BuiltinVoteFail_NotEnoughVotes = 4,	/**< Vote did not receive enough votes. */	
+	BuiltinVoteFail_NotEnoughVotes = 4,	/**< Vote did not receive enough votes. */
 }
-
-enum eVoteType
-{
-	eVoteNone = -1,
-	eBuiltinVote = 0,
-	eGameVote = 1
-};
-
-enum eBuiltinVoteCreateError
-{
-	eBuiltinVoteErrorNone = 0, // Vote was created
-	eBlockedWithForward, // Vote blocked with forward 'OnBuiltinVoteCreated'
-	eInvalidParamBuiltinVoteType // Invalid parameter 'BuiltinVoteType' passed to native 'CreateBuiltinVote' or not available in this game
-};
-
-/**
- * Called at the start of creating a vote, at this moment information such as argument, initiator, etc. is not available.
- * NOTE: When using this forward, you need to add a check to the plugin for the vote handle, 
- * otherwise there will be errors in the logs of the sourcemod, because the vote handle will not be set after blocking the forward.
- *
- * @param hPlugin			Handle to the plugin from which the vote was created.
- * @param sPluginName		The name of the plugin from which the vote was created.
- * @return					'Plugin_Continue' to allow voting, otherwise voting will be blocked.
- */
-forward Action OnBuiltinVoteCreate(Handle hPlugin, const char[] sPluginName);
-
-/**
- * Called when a vote is created and the vote panel has not yet been sent to the players,
- * at this moment information such as argument, initiator, etc. is available.
- *
- * @param hVote				Vote Handle.
- * @param hPlugin			Handle to the plugin from which the vote was created.
- * @param sPluginName		The saved name of the plugin from which the vote was created.
- * @return					'Plugin_Continue' to allow voting, otherwise voting will be blocked.
- */
-forward Action OnBuiltinVoteStart(Handle hVote, Handle hPlugin, const char[] sPluginName);
 
 /**
  * Called when a vote action is completed.
@@ -232,11 +193,9 @@ typedef BuiltinVoteActionHandler = function void(Handle vote, BuiltinVoteAction 
  *							Cancel, and End will always be received regardless
  *							of whether they are set or not.  They are also
  *							the only default actions.
- * @param error				The reason why the vote was not created.
- *
- * @return					A new vote Handle or null if vote was not created.
+ * @return					A new vote Handle.
  */
-native Handle CreateBuiltinVote(BuiltinVoteActionHandler handler, BuiltinVoteType voteType, BuiltinVoteAction actions = BUILTINVOTE_ACTIONS_DEFAULT, eBuiltinVoteCreateError &error);
+native Handle CreateBuiltinVote(BuiltinVoteActionHandler handler, BuiltinVoteType voteType, BuiltinVoteAction actions=BUILTINVOTE_ACTIONS_DEFAULT);
 
 /**
  * Broadcasts a vote to a list of clients.  The most selected item will be
@@ -273,7 +232,7 @@ stock bool DisplayBuiltinVoteToAll(Handle vote, int time)
 		if (!IsClientInGame(i) || IsFakeClient(i)) {
 			continue;
 		}
-
+		
 		iPlayers[iNumPlayers++] = i;
 	}
 
@@ -424,12 +383,8 @@ native void CancelBuiltinVote();
  *							defines.
  * @noreturn
  */
-//typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info);
-typeset BuiltinVoteHandler
-{
-	function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info);
-	function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info, any data);
-};
+typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_clients, const int[][] client_info, int num_items, const int[][] item_info);
+//typedef BuiltinVoteHandler = function void(Handle vote, int num_votes, int num_clients, const int[][2] client_info, int num_items, const int[][2] item_info);
 
 /**
  * Sets an advanced vote handling callback.  If this callback is set,
@@ -437,16 +392,10 @@ typeset BuiltinVoteHandler
  *
  * @param vote				BuiltinVote Handle.
  * @param callback			Callback function.
- * @param data				Handle or value to pass through to the BuiltinVoteHandler callback function.
- * @param dataFlags			'BV_DATA_HNDL_CLOSE' for the data handle to be destroyed after the vote or 0.
- *							If you are passing in parameter 'data' a handle (for example - DataPack) here that was supposed to be closed,
- *							you must pass the constant 'BV_DATA_HNDL_CLOSE' to parameter 'dataFlags'.
- *							If you pass a constant 'BV_DATA_HNDL_CLOSE' to parameter 'dataFlags',
- *							then extension will destroy it or you have to close it yourself to avoid getting a memory leak.
  * @noreturn
  * @error					Invalid Handle or callback.
  */
-native void SetBuiltinVoteResultCallback(Handle vote, BuiltinVoteHandler callback, any data = 0, int dataFlags = 0);
+native void SetBuiltinVoteResultCallback(Handle vote, BuiltinVoteHandler callback);
 
 /**
  * Returns the number of seconds you should "wait" before displaying
@@ -575,7 +524,7 @@ stock bool IsNewBuiltinVoteAllowed()
 
 /**
  * Checks if the BuiltinVote is in progress
- * By default this is already built into the native IsBuiltinVoteInProgress(),
+ * By default this is already built into the native IsBuiltinVoteInProgress(), 
  * you can use this for something else
  *
  * @return				True if BuiltinVote vote in progress, otherwise false
@@ -584,7 +533,7 @@ native bool BuiltinVote_IsVoteInProgress();
 
 /**
  * Checks if the in-game voting is in progress
- * By default this is already built into the native IsBuiltinVoteInProgress(),
+ * By default this is already built into the native IsBuiltinVoteInProgress(), 
  * you can use this for something else
  *
  * @return				True if game vote in progress, otherwise false
@@ -596,30 +545,10 @@ native bool Game_IsVoteInProgress();
  * @remarks		Team number: 1 - spectators, 2 - survivors, 3 - infected
  * @remarks		It hardly works for a team of spectators
  *
- * @returns		-1 if no vote in progress or vote is for everyone,
+ * @returns		-1 if no vote in progress or vote is for everyone, 
  *					otherwise the command number
  */
 native int Game_GetVoteTeam();
-
-/**
- * Returns the type of vote currently in progress
- *
- * @return eVoteType        eVoteNone (-1) - if the vote is not in progress now,
- *							eBuiltinVote (0) - if 'builtinvote' voting is in progress,
- *							eGameVote (1) - if in-game voting is in progress.
- */
-stock eVoteType GetVoteType_InProgress()
-{
-	if (BuiltinVote_IsVoteInProgress()) {
-		return eBuiltinVote;
-	}
-
-	if (Game_IsVoteInProgress()) {
-		return eGameVote;
-	}
-
-	return eVoteNone;
-}
 
 /**
  * Retrieves voting information from BuiltinVoteAction_VoteEnd.
@@ -648,7 +577,7 @@ stock void GetBuiltinVoteInfo(int param2, int &winningVotes, int &totalVotes)
 stock bool DisplayBuiltinVoteToTeam(Handle vote, int team, int time)
 {
 	SetBuiltinVoteTeam(vote, team);
-
+	
 	int iNumPlayers;
 	int[] iPlayers = new int[MaxClients];
 
@@ -656,7 +585,7 @@ stock bool DisplayBuiltinVoteToTeam(Handle vote, int team, int time)
 		if (!IsClientInGame(i) || IsFakeClient(i) || (GetClientTeam(i) != team)) {
 			continue;
 		}
-
+		
 		iPlayers[iNumPlayers++] = i;
 	}
 
@@ -679,7 +608,7 @@ stock bool DisplayBuiltinVoteToAllButOne(Handle vote, int client, int time)
 	if (!IsClientInGame(client)) {
 		return false;
 	}
-
+	
 	int iNumPlayers;
 	int[] iPlayers = new int[MaxClients];
 
@@ -687,7 +616,7 @@ stock bool DisplayBuiltinVoteToAllButOne(Handle vote, int client, int time)
 		if (!IsClientInGame(i) || IsFakeClient(i) || (i == client)) {
 			continue;
 		}
-
+		
 		iPlayers[iNumPlayers++] = i;
 	}
 
@@ -719,7 +648,7 @@ stock bool DisplayBuiltinVoteToTeamButOne(Handle vote, int client, int time)
 #endif
 
 	SetBuiltinVoteTeam(vote, team);
-
+	
 	int iNumPlayers;
 	int[] iPlayers = new int[MaxClients];
 
@@ -727,10 +656,10 @@ stock bool DisplayBuiltinVoteToTeamButOne(Handle vote, int client, int time)
 		if (!IsClientInGame(i) || IsFakeClient(i) || (i == client) || (GetClientTeam(i) != team)) {
 			continue;
 		}
-
+		
 		iPlayers[iNumPlayers++] = i;
 	}
-
+	
 	return DisplayBuiltinVote(vote, iPlayers, iNumPlayers, time);
 }
 
@@ -752,7 +681,7 @@ stock bool DisplayBuiltinVoteToAllNonSpectators(Handle vote, int time)
 		if (!IsClientInGame(i) || IsFakeClient(i) || (GetClientTeam(i) < 2)) {
 			continue;
 		}
-
+		
 		iPlayers[iNumPlayers++] = i;
 	}
 
